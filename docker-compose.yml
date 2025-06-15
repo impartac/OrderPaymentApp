@@ -1,0 +1,152 @@
+version: "3.8"
+
+name: service
+services:
+  zookeeper:
+      image: 'bitnami/zookeeper:latest'
+      ports:
+        - '2181:2181'
+      environment:
+        - ALLOW_ANONYMOUS_LOGIN=yes
+  kafka:
+    image: 'bitnami/kafka:latest'
+    environment:
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093 
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER 
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093 
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+    ports:
+      - '9092:9092'
+    volumes:
+      - kafka_data:/bitnami/kafka
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "./opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server kafka:9092 > /dev/null 2>&1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+  order_data_db:
+    build:
+      context: OrderDataDB
+      dockerfile: Dockerfile
+    ports:
+      - "${ORDER_DB_PORT}:5432"
+    volumes:
+      - order_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "${ORDER_DB_USER}"
+      POSTGRES_PASSWORD: "${ORDER_DB_PASS}"
+      POSTGRES_DB: "${ORDER_DB}"
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U user"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+        start_period: 10s
+  order_service:  
+    container_name: order_service
+    build:
+      context: OrderService
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_USER: "${ORDER_DB_USER}"
+      POSTGRES_PASSWORD: "${ORDER_DB_PASS}"
+      POSTGRES_DB: "${ORDER_DB}"
+      POSTGRES_HOST: "order_data_db"
+      POSTGRES_PORT: 5432
+      KAFKA_URL: "kafka:9092"
+      KAFKA_ORDER_MESSAGES_TOPIC: "order_created_messages"
+      KAFKA_PAYMENT_MESSAGE_TOPIC: "payment_messages"
+    ports:
+      - "${ORDER_SERVICE_PORT}:8000"
+    depends_on:
+      - order_data_db
+      - kafka
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8082:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local-kafka
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    depends_on:
+      - kafka
+      - zookeeper
+  payment_data_db:
+    build:
+      context: PaymentDataDB
+      dockerfile: Dockerfile
+    ports:
+      - "${PAYMENT_DB_PORT}:5432"
+    volumes:
+      - payment_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "${PAYMENT_DB_USER}"
+      POSTGRES_PASSWORD: "${PAYMENT_DB_PASS}"
+      POSTGRES_DB: "${PAYMENT_DB}"
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U user"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+        start_period: 10s
+  payment_service:  
+    container_name: payment_service
+    build:
+      context: PaymentService
+      dockerfile: Dockerfile
+    environment:
+      LOGGER_LEVEL: "INFO"
+      POSTGRES_USER: "${PAYMENT_DB_USER}"
+      POSTGRES_PASSWORD: "${PAYMENT_DB_PASS}"
+      POSTGRES_DB: "${PAYMENT_DB}"
+      POSTGRES_HOST: "payment_data_db"
+      POSTGRES_PORT: 5432
+      KAFKA_URL: "kafka:9092"
+      KAFKA_ORDER_MESSAGES_TOPIC: "order_created_messages"
+      KAFKA_PAYMENT_MESSAGE_TOPIC: "payment_messages"
+    ports:
+      - "${PAYMENT_SERVICE_PORT}:8000"
+    depends_on:
+      - payment_data_db
+      - kafka
+
+  # file_analysis_service:
+  #   container_name: file_analysis_service
+  #   build:
+  #     context: AnalysisFileService
+  #     dockerfile: Dockerfile
+  #   environment:      
+
+  #     POSTGRES_USER: "${ANALYSIS_DB_USER}"
+  #     POSTGRES_PASSWORD: "${ANALYSIS_DB_PASS}"
+  #     POSTGRES_DB: "${ANALYSIS_DB}"
+  #     POSTGRES_HOST: "analysis_data_db"
+  #     POSTGRES_PORT: 5432
+
+  #     LOGGER_LEVEL: INFO
+  #   ports:
+  #     - "${ANALYSIS_SERVICE_PORT}:8000"
+  #   depends_on:
+  #     - analysis_data_db
+  # nginx:
+  #   build: ./nginx
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - file_storage_service
+  #     - file_analysis_service 
+volumes:
+  order_data:
+  payment_data:
+  kafka_data: 
