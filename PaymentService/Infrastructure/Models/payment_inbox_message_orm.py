@@ -2,7 +2,7 @@ from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import FLOAT, UUID as SQLUUID
-from sqlalchemy import ForeignKey, DateTime, Boolean
+from sqlalchemy import DateTime, Boolean
 
 from .base_orm import BaseORM
 

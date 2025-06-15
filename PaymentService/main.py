@@ -17,35 +17,6 @@ from Application.message_producer_service import MessageProducerService
 from Application.payment_perfoming_service import PaymentPerformingService
 from Application.unit_of_work_interface import UnitOfWorkInterface
 
-
-# ------------------------------------------------------------------------------------------
-class ResilientMessageConsumerService(MessageConsumerService):
-    async def start_consuming(self):
-        while True:
-            try:
-                await super().start_consuming()
-            except KafkaConnectionError as e:
-                print(f"Kafka connection error: {e}, reconnecting...")
-                await asyncio.sleep(5)
-                # Пересоздаем consumer
-                self.message_consumer = await _get_message_consumer()
-            except Exception as e:
-                print(f"Unexpected error in consumer: {e}")
-                await asyncio.sleep(10)
-
-class ResilientMessageProducerService(MessageProducerService):
-    async def start_producing(self):
-        while True:
-            try:
-                await super().start_producing()
-            except KafkaConnectionError as e:
-                print(f"Kafka connection error: {e}, reconnecting...")
-                await asyncio.sleep(5)
-                # Пересоздаем producer
-                self.message_producer = await _get_message_producer()
-            except Exception as e:
-                print(f"Unexpected error in producer: {e}")
-                await asyncio.sleep(10)
 # ------------------------------------------------------------------------------------------
 async def _get_unit_of_work() -> UnitOfWorkInterface:
     return UnitOfWork(
@@ -116,21 +87,7 @@ async def _get_payment_perfoming_service() -> PaymentPerformingService:
         uow = uow,
         payment_outbox_message_factory = payment_outbox_message_factory
     )
-    
-# async def _get_message_consumer_service() -> ResilientMessageConsumerService:
-#     uow = await _get_unit_of_work()
-#     message_consumer = await _get_message_consumer()
-#     return ResilientMessageConsumerService(
-#         uow=uow,
-#         message_consumer=message_consumer
-#     )
-# async def _get_message_producer_service() -> ResilientMessageProducerService:
-#     uow = await _get_unit_of_work()
-#     message_producer = await _get_message_producer()
-#     return ResilientMessageProducerService(
-#         uow=uow,
-#         message_producer=message_producer
-#     )
+
 
 
 async def main():

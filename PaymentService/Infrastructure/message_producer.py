@@ -22,20 +22,20 @@ class MessageProducer(MessageProducerInterface):
         self._is_running = False 
 
     async def start(self):
-        if not self._is_running: # to Prevent run more then once
+        if not self._is_running:
             await self._kafka_producer.start()
             self._is_running = True
-            logger.info("Kafka Producer started successfully") # Add log when producer start
+            logger.info("Kafka Producer started successfully")
         else:
-            logger.warning("Kafka Producer is already running") # Add log if it is already running
+            logger.warning("Kafka Producer is already running")
 
     async def stop(self):
         if self._is_running:
             await self._kafka_producer.stop()
             self._is_running = False
-            logger.info("Kafka Producer stopped successfully")  # Add log when producer stop
+            logger.info("Kafka Producer stopped successfully")
         else:
-            logger.warning("Kafka Producer is already stopped") 
+            logger.warning("Kafka Producer is already stopped")
 
     async def send_message_batch(self, messages: List[PaymentOutboxMessage]) -> List[UUID]:
         message_ids = []
@@ -47,7 +47,7 @@ class MessageProducer(MessageProducerInterface):
                 )
                 message_ids.append(message.id)
                 logger.info(f"Message with ID {message.id} sent successfully.")
-            except KafkaError as e:  # Catch specific kafka error
+            except KafkaError as e: 
                 logger.error(f"Failed to send message with ID {message.id}: {e}")
-                raise  # Raise to stop and handle in higher function
+                raise  
         return message_ids

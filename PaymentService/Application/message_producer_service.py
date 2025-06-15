@@ -18,7 +18,6 @@ class MessageProducerService:
     
     
     async def _produce_messages(self) -> None:
-        # try:
         async with self._uow.start():
             logger.info("UOW started for producing messages")
             payment_outbox_mesage_repository = await self._uow.get_payment_outbox_message_repository()
@@ -36,11 +35,6 @@ class MessageProducerService:
             logger.info(f"Marked messages as processed: {published_ids}")
             
             logger.info("UOW committed after producing messages")
-                
-        # except Exception as e:
-        #     logger.error(f"Error while producing messages:{str(e)}") 
-        #     logger.debug("UOW rollback triggered")
-        #     raise 
     
     async def start_producing(self) -> None:
         logger.info("Func: start_producing")

@@ -1,4 +1,3 @@
-# from Domain.Entities.payment_inbox_message import PaymentInboxMessage
 from Domain.Factories.bank_account_factory_interface import BankAccountFactoryInterface
 from Domain.Entities.bank_account import BankAccount
 from Domain.Factories.payment_inbox_message_factory_interface import PaymentInboxMessageFactoryInterface
@@ -22,5 +21,3 @@ class DTOPaymnetInboxMessageMapper:
     def __init__(self, factory : PaymentInboxMessageFactoryInterface):
         self._factory = factory
 
-    # async def map_from_order(self, order : BankAccount) -> OutboxMessage:
-    #     return await self._factory.build(order)
