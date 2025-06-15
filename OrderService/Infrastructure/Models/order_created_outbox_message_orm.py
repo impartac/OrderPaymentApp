@@ -6,8 +6,8 @@ from sqlalchemy import ForeignKey, DateTime, Boolean
 
 from .base_orm import BaseORM
 
-class OutboxMessageORM(BaseORM):
-    __tablename__ = "messages"
+class OrderCreatedOutboxMessageORM(BaseORM):
+    __tablename__ = "order_created_messages"
     __table_args__ = {"schema": "order_storage"}
 
     order_id: Mapped[UUID] = mapped_column(SQLUUID,

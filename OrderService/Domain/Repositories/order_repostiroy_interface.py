@@ -22,3 +22,12 @@ class OrderRepositoryInterface(RepositoryInterface):
     @abstractmethod
     async def get_status(self, order_id : UUID) -> STATUS:
         pass
+    
+    @abstractmethod
+    async def set_finished_status(self, order_id : UUID) -> None:
+        pass
+    
+    @abstractmethod
+    async def set_cancelled_status(self, order_id : UUID) -> None:
+        pass
+    

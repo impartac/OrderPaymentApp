@@ -1,7 +1,6 @@
 import asyncio
 import uvicorn
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
-from aiokafka.errors import KafkaConnectionError
 
 
 from Infrastructure.Config.config import settings,session_maker
@@ -43,7 +42,6 @@ async def _get_payment_inbox_message_mapper() -> PaymentInboxMessageMapper:
     )
 async def _get_message_consumer() -> MessageConsumer:
     kafka_consumer = await _get_kafka_consumer()
-    # await kafka_consumer.start()
     payment_inbox_message_mapper = await _get_payment_inbox_message_mapper()
     return MessageConsumer(
         kafka_consumer = kafka_consumer,
@@ -66,7 +64,6 @@ async def _get_kafka_producer() -> AIOKafkaProducer:
 
 async def _get_message_producer() -> MessageProducer:
     kafka_producer = await _get_kafka_producer()
-    # await kafka_producer.start()
     return MessageProducer(
         kafka_producer = kafka_producer,
         topic = settings.KAFKA_PAYMENT_MESSAGE_TOPIC

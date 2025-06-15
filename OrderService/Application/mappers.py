@@ -1,7 +1,7 @@
-from Domain.Entities.outbox_message import OutboxMessage
+from Domain.Entities.order_created_outbox_message import OrderCreatedOutboxMessage
 from Domain.Factories.order_factory_interface import OrderFactoryInterface
 from Domain.Entities.order import Order
-from Domain.Factories.outbox_message_factory_interface import OutboxMessageFactoryInterface
+from Domain.Factories.order_created_outbox_message_factory_interface import OrderCreatedOutboxMessageFactoryInterface
 from .dto import CreateOrderDTO
 
 
@@ -18,11 +18,11 @@ class DTOOrderMapper:
             description= dto.description
         )
 
-class DTOOutboxMessageMapper:
-    _factory : OutboxMessageFactoryInterface
+class DTOOrderCreatedOutboxMessageMapper:
+    _factory : OrderCreatedOutboxMessageFactoryInterface
 
-    def __init__(self, factory : OutboxMessageFactoryInterface):
+    def __init__(self, factory : OrderCreatedOutboxMessageFactoryInterface):
         self._factory = factory
 
-    async def map_from_order(self, order : Order) -> OutboxMessage:
+    async def map_from_order(self, order : Order) -> OrderCreatedOutboxMessage:
         return await self._factory.build(order)

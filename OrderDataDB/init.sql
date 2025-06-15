@@ -19,11 +19,18 @@ CREATE TABLE IF NOT EXISTS order_storage.orders (
     status order_storage.status NOT NULL DEFAULT 'NEW'
 );
 
-CREATE TABLE IF NOT EXISTS order_storage.messages (
+CREATE TABLE IF NOT EXISTS order_storage.order_created_messages (
     order_id UUID PRIMARY KEY NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     processed BOOLEAN NOT NULL DEFAULT FALSE,
     user_id UUID NOT NULL,
     amount FLOAT NOT NULL,
     FOREIGN KEY (order_id) REFERENCES order_storage.orders(id)
+);
+
+CREATE TABLE IF NOT EXISTS order_storage.payment_processed_inbox_messages (
+    order_id UUID PRIMARY KEY NOT NULL,
+    is_success BOOLEAN NULL,
+    processed BOOLEAN NOT NULL DEFAULT FALSE,
+    description VARCHAR(255) NOT NULL
 );

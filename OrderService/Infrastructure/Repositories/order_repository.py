@@ -4,7 +4,7 @@ from uuid import UUID
 from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from Domain.Repositories.order_repostiroy_interface import OrderRepositoryInterface
 from Domain.Entities.order import Order
@@ -48,3 +48,11 @@ class OrderRepository(BaseRepository, OrderRepositoryInterface):
         if not orm:
             raise ValueError()
         return orm.status
+
+    async def set_finished_status(self, order_id : UUID) -> None:
+        query = update(OrderORM).where(OrderORM.id == order_id).values(status = STATUS.FINISHED)
+        await self._session.execute(query)
+    
+    async def set_cancelled_status(self, order_id : UUID) -> None:
+        query = update(OrderORM).where(OrderORM.id == order_id).values(status = STATUS.CANCELLED)
+        await self._session.execute(query)

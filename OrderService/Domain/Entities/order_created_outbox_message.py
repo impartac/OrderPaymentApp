@@ -3,7 +3,7 @@ from uuid import UUID
 
 from .entity import Entity
 
-class OutboxMessage(Entity):
+class OrderCreatedOutboxMessage(Entity):
 
     created_at : datetime
     processed : bool

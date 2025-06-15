@@ -16,7 +16,7 @@ class MessageProducer(MessageProducerInterface):
     _topic : str
     _is_running : bool
 
-    def __init__(self, kafka_producer : AIOKafkaProducer, topic : str = "order_created_messages"):
+    def __init__(self, kafka_producer : AIOKafkaProducer, topic : str = "payment_messages"):
         self._kafka_producer = kafka_producer
         self._topic = topic
         self._is_running = False 

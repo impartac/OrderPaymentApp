@@ -58,3 +58,8 @@ class UnitOfWork(UnitOfWorkInterface):
             raise ValueError()
         self._payment_inbox_message_repository = PaymentInboxMessageRepository(self._session)
         return self._payment_inbox_message_repository
+
+    async def flush(self) -> None:
+        if not self._session:
+            raise ValueError()
+        await self._session.flush()
