@@ -7,7 +7,7 @@ services:
       ports:
         - '2181:2181'
       environment:
-        - ALLOW_ANONYMOUS_LOGIN=yes
+      - ALLOW_ANONYMOUS_LOGIN=yes
   kafka:
     image: 'bitnami/kafka:latest'
     environment:
@@ -28,11 +28,12 @@ services:
       test:
         [
           "CMD-SHELL",
-          "./opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server kafka:9092 > /dev/null 2>&1",
+          "kafka-topics.sh --bootstrap-server kafka:9092 --list > /dev/null 2>&1 || exit 1"
         ]
       interval: 10s
       timeout: 10s
       retries: 10
+      start_period: 30s
   order_data_db:
     build:
       context: OrderDataDB
@@ -68,8 +69,10 @@ services:
     ports:
       - "${ORDER_SERVICE_PORT}:8000"
     depends_on:
-      - order_data_db
-      - kafka
+      order_data_db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -118,8 +121,10 @@ services:
     ports:
       - "${PAYMENT_SERVICE_PORT}:8000"
     depends_on:
-      - payment_data_db
-      - kafka
+      payment_data_db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   # file_analysis_service:
   #   container_name: file_analysis_service
