@@ -125,32 +125,13 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
-
-  # file_analysis_service:
-  #   container_name: file_analysis_service
-  #   build:
-  #     context: AnalysisFileService
-  #     dockerfile: Dockerfile
-  #   environment:      
-
-  #     POSTGRES_USER: "${ANALYSIS_DB_USER}"
-  #     POSTGRES_PASSWORD: "${ANALYSIS_DB_PASS}"
-  #     POSTGRES_DB: "${ANALYSIS_DB}"
-  #     POSTGRES_HOST: "analysis_data_db"
-  #     POSTGRES_PORT: 5432
-
-  #     LOGGER_LEVEL: INFO
-  #   ports:
-  #     - "${ANALYSIS_SERVICE_PORT}:8000"
-  #   depends_on:
-  #     - analysis_data_db
-  # nginx:
-  #   build: ./nginx
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     - file_storage_service
-  #     - file_analysis_service 
+  nginx:
+      build: ./nginx
+      ports:
+        - "80:80"
+      depends_on:
+        - payment_service
+        - order_service
 volumes:
   order_data:
   payment_data:
